@@ -1,37 +1,33 @@
-module "web_server_sg" {
+/* ==========Security Group for EC2 Instances (ALB--> EC2)============*/
+module "EC2-security-group" {
   source = "terraform-aws-modules/security-group/aws"
 
-  name        = "web-server-sg"
+  name        = "EC2-security-group"
   description = "Security group for web-server with HTTP and SSH ports open within VPC"
   vpc_id      = module.vpc.vpc_id
 
-    /*===Inbound Rules===*/
+  /*===Inbound Rules===*/
   ingress_with_cidr_blocks = [
     {
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-      cidr_blocks = "0.0.0.0/0"  
-      description = "Allow SSH from your IP address"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = module.ALB-security-group.security_group_id
+      description = "Allow traffic only from the ALB security group"
     },
-     {
-      from_port   = 80
-      to_port     = 80
-      protocol    = "tcp"
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
       cidr_blocks = "0.0.0.0/0"
-      description = "Allow HTTP outbound traffic"
-    },
-     {
-      from_port   = -1
-      to_port     = -1
-      protocol    = "icmp"
-      cidr_blocks = "0.0.0.0/0"
-      description = "Allow ICMP inbound traffic to ping instances"
+      description = "Allow all outbound traffic"
     }
+
+
   ]
 
-    /*===Outbound Rules===*/
-   egress_with_cidr_blocks = [
+  /*===Outbound Rules===*/
+  egress_with_cidr_blocks = [
     {
       from_port   = 0
       to_port     = 0
@@ -41,8 +37,51 @@ module "web_server_sg" {
     }
   ]
 
+  tags = {
+    Name = "EC2-SG"
+  }
 }
 
-output "security_group_id" {
-  value = module.web_server_sg.security_group_id
+/* ==========Security Group for Application Load Balancer (Internet --> ALB)============*/
+
+module "ALB-security-group" {
+  source = "terraform-aws-modules/security-group/aws"
+
+  name        = "ALB-security-group"
+  description = "Security group for web-server with HTTP and SSH ports open within VPC"
+  vpc_id      = module.vpc.vpc_id
+
+  /*===Inbound Rules===*/
+  ingress_with_cidr_blocks = [
+    {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = "0.0.0.0/0"
+      description = "Allow HTTP outbound traffic"
+    }
+  ]
+
+  /*===Outbound Rules===*/
+  egress_with_cidr_blocks = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = "0.0.0.0/0"
+      description = "Allow all outbound traffic"
+    }
+  ]
+
+  tags = {
+    Name = "ALB-SG"
+  }
+
 }
+
+
+output "ec2_security_group_id" {
+  value = module.EC2-security-group.security_group_id
+}
+
+

@@ -12,3 +12,8 @@ variable "profile" {
   description = "Profile"
   type        = string
 }
+
+variable "ami" {
+  description = "Profile"
+  type        = string
+}
