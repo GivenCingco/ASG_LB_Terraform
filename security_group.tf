@@ -12,7 +12,8 @@ module "EC2-security-group" {
       from_port   = 0
       to_port     = 0
       protocol    = "-1"
-      cidr_blocks = module.ALB-security-group.security_group_id
+      security_groups =module.ALB-security-group.security_group_id
+
       description = "Allow traffic only from the ALB security group"
     },
     {

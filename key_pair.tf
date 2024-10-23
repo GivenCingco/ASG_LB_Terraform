@@ -22,6 +22,6 @@ resource "aws_secretsmanager_secret_version" "ec2_key_pair" {
 module "key_pair" {
   source = "terraform-aws-modules/key-pair/aws"
 
-  key_name   = "ASG_LB_KP1"
+  key_name   = "ASG_LB_KP20"
   public_key = trimspace(tls_private_key.this.public_key_openssh)
 }
